@@ -1,6 +1,7 @@
 {
   "python.envFile": "${workspaceFolder}/.env",
   "python.analysis.extraPaths": [
-    "C:/Program Files/Webots/lib/controller/python"
+    "C:/Program Files/Webots/lib/controller/python",
+    "/Applications/Webots.app/Contents/lib/controller/python"
   ]
 }

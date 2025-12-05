@@ -1,7 +1,7 @@
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-from controller import Robot, RangeFinder, Motor, Supervisor
+from controller import RangeFinder, Motor, Supervisor, DistanceSensor
 
 class WebotsTestRLEnv(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -21,10 +21,18 @@ class WebotsTestRLEnv(gym.Env):
         self.range_finder: RangeFinder = self.robot.getDevice('range-finder')
         self.range_finder.enable(self.timestep)
 
+        self.ir_sensors = []
+        for i in range(8):
+            sensor: DistanceSensor = self.robot.getDevice(f'ps{i}')
+            sensor.enable(self.timestep)
+            self.ir_sensors.append(sensor)
+
         w = self.range_finder.getWidth()
         h = self.range_finder.getHeight()
 
         self.current_step = 0
+
+        self.max_steps = 500
 
         self.observation_space = spaces.Box(
             low=0.0,
@@ -45,7 +53,10 @@ class WebotsTestRLEnv(gym.Env):
             self.np_random, _ = gym.utils.seeding.np_random(seed)
 
         self.robot.simulationReset()
+        # self.current_step = 0
         self.robot.step(self.timestep)
+        self.left_motor.setPosition(float('inf'))
+        self.right_motor.setPosition(float('inf'))
 
         print("resetting env")
 
@@ -54,9 +65,7 @@ class WebotsTestRLEnv(gym.Env):
         return obs, info
     
     def step(self, action):
-        EPS = 1e-3  # small buffer
-        left_speed = 3
-        right_speed = 3
+        left_speed, right_speed = np.clip(action, -self.MAX_SPEED, self.MAX_SPEED)
         self.left_motor.setVelocity(float(left_speed))
         self.right_motor.setVelocity(float(right_speed))
         self.robot.step(self.timestep)
@@ -65,11 +74,10 @@ class WebotsTestRLEnv(gym.Env):
         obs = self._get_observation()
         reward = self.compute_reward(obs, action)
 
-        terminated = reward < -5.0
+        terminated = self.is_collision()
         truncated = False
         info = {}
 
-        # Debug print
         print(f"Step {self.current_step}: action={action}, reward={reward}, min_dist={np.min(obs)}")
 
         return obs, reward, terminated, truncated, info
@@ -84,13 +92,21 @@ class WebotsTestRLEnv(gym.Env):
 
         return depth.flatten()
 
-    def compute_reward(self, depth, action):
-        min_dist = np.min(depth)
-        if min_dist < 0.1:
-            return -10.0  # collision
+    def is_collision(self):
+        threshold = 160.0
+        for sensor in self.ir_sensors:
+            if sensor.getValue() > threshold:
+                return True
+        return False
 
-        # reward for moving forward (average wheel speed in forward direction)
+    def compute_reward(self, depth, action):
+        if self.is_collision():
+            return -10.0
+
+        min_dist = np.min(depth)
+        min_dist = min(min_dist, 0.5)
+
         forward_reward = (action[0] + action[1]) / 2.0
-        # combine forward movement with obstacle avoidance
-        reward = min_dist + 0.5 * forward_reward
+        straight_reward = -abs(action[0] - action[1])
+        reward = min_dist + 2.0 * forward_reward + 0.2 * straight_reward
         return reward

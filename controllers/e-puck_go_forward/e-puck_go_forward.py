@@ -36,3 +36,4 @@ right_motor.setVelocity(-0.1 * MAX_SPEED)
 # update loop
 while robot.step(TIME_STEP) != -1:
     img = camera.getImage()
+    

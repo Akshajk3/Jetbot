@@ -11,7 +11,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -0.21492336635858728 -0.6459598660620333 0.732491500312606 5.430466945756327
-  position -0.31056457066793985 0.22111563598344108 0.2587735102795704
+  position -1.071710807234774 0.7906482578963844 0.8691744043633385
 }
 TexturedBackground {
 }
@@ -43,6 +43,7 @@ Robot {
       translation 0.03 0 0.028
       width 1280
       height 800
+      near 0.05
       minRange 0.05
     }
     HingeJoint {
@@ -63,7 +64,7 @@ Robot {
         }
       ]
       endPoint DEF EPUCK_LEFT_WHEEL Solid {
-        translation 0 0.02599999999999935 0.02
+        translation 0 0.02599999999999309 0.02
         rotation 0 -1 0 2.4853238607708983
         children [
           DEF EPUCK_WHEEL Pose {
@@ -216,7 +217,7 @@ Robot {
         }
       ]
       endPoint DEF EPUCK_RIGHT_WHEEL Solid {
-        translation 0 -0.02599999999999935 0.02
+        translation 0 -0.02599999999999323 0.02
         rotation 0 1 0 2.485323866368099
         children [
           Pose {

@@ -18,10 +18,11 @@ def train():
         verbose=1,
         learning_rate=3e-4,
         batch_size=64,
-        device=device
+        device=device,
+        n_steps=512
     )
 
-    model.learn(total_timesteps=1000)
+    model.learn(total_timesteps=300_000)
 
     model.save("epuck_depth_rl")
 

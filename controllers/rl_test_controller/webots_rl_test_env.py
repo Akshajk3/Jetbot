@@ -32,7 +32,7 @@ class WebotsTestRLEnv(gym.Env):
 
         self.current_step = 0
 
-        self.max_steps = 500
+        self.max_steps = 2000
 
         self.observation_space = spaces.Box(
             low=0.0,
@@ -53,7 +53,6 @@ class WebotsTestRLEnv(gym.Env):
             self.np_random, _ = gym.utils.seeding.np_random(seed)
 
         self.robot.simulationReset()
-        # self.current_step = 0
         self.robot.step(self.timestep)
         self.left_motor.setPosition(float('inf'))
         self.right_motor.setPosition(float('inf'))

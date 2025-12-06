@@ -1,4 +1,4 @@
 import train
 import play
 
-play.play()
+train.train()
